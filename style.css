@@ -1,0 +1,9 @@
+.divMeteo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  color: black;
+}
