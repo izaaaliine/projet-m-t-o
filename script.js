@@ -10,7 +10,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 map.on('click', function (event) {
   const latitude = event.latlng.lat;
   const longitude = event.latlng.lng;
-
+  console.log(event);
   const reverseGeocodingUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
   fetch(reverseGeocodingUrl)
     .then((response) => response.json())
