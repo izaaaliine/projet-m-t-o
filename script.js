@@ -33,12 +33,10 @@ map.on('click', function (event) {
           console.log(data);
           const temperature = data.current.temperature_2m;
           const contenu = `Ville : ${cityName}<br>Température : ${temperature} °C`;
-
           // Supprimer le popup existant s'il y en a un
           if (marqueur) {
             map.removeLayer(marqueur);
           }
-
           // Ajouter un nouveau marqueur à la position cliquée avec le contenu du popup
           marqueur = L.marker([latitude, longitude]).addTo(map);
           marqueur.bindPopup(contenu);
@@ -47,4 +45,55 @@ map.on('click', function (event) {
     });
 });
 
-let marqueur; // Déclarer la variable marqueur à l'extérieur de la fonction map.on('click', ...)
+const btnSearch = document.querySelector('.btnSearch');
+const input = document.querySelector('.input');
+let marqueur; // Assurez-vous que la variable marqueur est déclarée
+
+function handleSearch() {
+  const city = input.value;
+
+  let temperature; // Déclarer la variable temperature globalement
+
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      if (data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        // Utiliser l'API Open Meteo pour obtenir la température
+        const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`;
+
+        fetch(openMeteoUrl)
+          .then((response) => response.json())
+          .then((openMeteoData) => {
+            // Assigner la valeur de la température à la variable globale
+            temperature = openMeteoData.current.temperature_2m;
+
+            // Supprimer le popup existant s'il y en a un
+            if (marqueur) {
+              map.removeLayer(marqueur);
+            }
+
+            // Ajouter un nouveau marqueur à la position cliquée avec le contenu du popup
+            marqueur = L.marker([lat, lon]).addTo(map);
+            marqueur.bindPopup(
+              `Ville : ${city}<br>Température : ${temperature} °C`
+            );
+            marqueur.openPopup();
+          });
+      } else {
+        alert('Aucune ville trouvée');
+      }
+    });
+}
+
+input.addEventListener('keydown', function (event) {
+  if (event.code === 'Enter') {
+    handleSearch();
+  }
+});
+
+// Ajouter l'événement pour le clic sur le bouton
+btnSearch.addEventListener('click', handleSearch);
